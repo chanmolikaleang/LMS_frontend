@@ -1,0 +1,54 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  role: Role
+  username: String!
+}
+
+type Mutation {
+  createStudent(createUserInput: CreateUserInput!): User!
+  createTeacher(createUserInput: CreateUserInput!): User!
+  signIn(signInDto: SignUpDto!): SignUpResponse!
+  signUp(signUpDto: SignUpDto!): SignUpResponse!
+}
+
+type Query {
+  getUser(uid: String!): User!
+  getUsers: [User!]!
+}
+
+enum Role {
+  Admin
+  Student
+  Teacher
+}
+
+input SignUpDto {
+  confirmPassword: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  username: String!
+}
+
+type SignUpResponse {
+  access_token: String!
+  email: String!
+  username: String!
+}
+
+type User {
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: String!
+  uid: String!
+  username: String!
+}
