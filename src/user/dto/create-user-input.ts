@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 // import { Role } from '@prisma/client';
-import { Role } from '../entities/user.entity';
+import { Gender, Role } from '../entities/user.entity';
 
 @InputType()
 export class CreateUserInput {
@@ -19,6 +19,21 @@ export class CreateUserInput {
   @Field()
   lastName: string;
 
+  @Field({ nullable: true })
+  profileImg: string;
+
+  @Field({ nullable: true })
+  contact: string;
+
+  @Field()
+  gender: Gender;
+
+  @Field()
+  dateOfBirth: string;
+
   @Field(() => Role, { nullable: true })
   role: Role;
+
+  @Field({ nullable: true })
+  subjectUid: string;
 }

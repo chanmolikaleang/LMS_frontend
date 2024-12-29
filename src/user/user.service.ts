@@ -2,14 +2,14 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserInput } from './dto/create-user-input';
 import { hashData } from 'src/utils';
-import { Role } from './entities/user.entity';
+import { Gender, Role } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async createTeacher(createUserInput: CreateUserInput) {
-    const { password, ...rest } = createUserInput;
+    const { password, subjectUid, gender, ...rest } = createUserInput;
 
     const hashed = await hashData(password);
 
@@ -19,6 +19,10 @@ export class UserService {
           ...rest,
           hashed,
           role: Role.Teacher,
+          gender: gender as Gender,
+          Subject: {
+            connect: { uid: subjectUid },
+          },
         },
       });
 
@@ -34,7 +38,7 @@ export class UserService {
   }
 
   async createStudent(createUserInput: CreateUserInput) {
-    const { password, ...rest } = createUserInput;
+    const { password, gender, ...rest } = createUserInput;
 
     const hashed = await hashData(password);
 
@@ -44,6 +48,7 @@ export class UserService {
           ...rest,
           hashed,
           role: Role.Student,
+          gender: gender as Gender,
         },
       });
 
@@ -73,8 +78,29 @@ export class UserService {
   async findAll() {
     try {
       const users = await this.prismaService.user.findMany({
+        // include: {
+        //   classroom: true,
+        // },
+      });
+
+      if (users.length === 0) {
+        throw new Error('No users found.');
+      }
+
+      return users;
+    } catch (error) {
+      throw new Error('Failed to fetch users.');
+    }
+  }
+
+  async getTeachers() {
+    try {
+      const users = await this.prismaService.user.findMany({
+        where: {
+          role: Role.Teacher,
+        },
         include: {
-          Class: true,
+          Subject: true,
         },
       });
 
@@ -82,10 +108,26 @@ export class UserService {
         throw new Error('No users found.');
       }
 
-      console.log(users);
       return users;
     } catch (error) {
-      console.error('Error fetching users:', error);
+      throw new Error('Failed to fetch users.');
+    }
+  }
+
+  async getStudents() {
+    try {
+      const users = await this.prismaService.user.findMany({
+        where: {
+          role: Role.Student,
+        },
+      });
+
+      if (users.length === 0) {
+        throw new Error('No users found.');
+      }
+
+      return users;
+    } catch (error) {
       throw new Error('Failed to fetch users.');
     }
   }

@@ -37,4 +37,20 @@ export class UserResolver {
   async findAll() {
     return await this.userService.findAll();
   }
+
+  @Query(() => [User], { name: 'getStudents' })
+  // @UseGuards(RolesGuard)
+  // @Roles(Role.Teacher, Role.Admin)
+  // @Roles(Role.Admin)
+  async getStudents() {
+    return await this.userService.getStudents();
+  }
+
+  @Query(() => [User], { name: 'getTeachers' })
+  // @UseGuards(RolesGuard)
+  // @Roles(Role.Teacher, Role.Admin)
+  // @Roles(Role.Admin)
+  async getTeachers() {
+    return await this.userService.getTeachers();
+  }
 }
