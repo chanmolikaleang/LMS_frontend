@@ -2,23 +2,67 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddStudentToClassroomInput {
+  classroomUid: String!
+  studentUids: [String!]
+}
+
+type AddStudentsResponse {
+  message: String!
+}
+
+type Classroom {
+  code: String!
+  name: String!
+  students: [User!]
+  teacher: User
+  uid: String!
+}
+
+input CreateClassroomInput {
+  code: String!
+  name: String!
+  studentUids: [String!]
+  teacherUid: String!
+  year: String!
+}
+
+input CreateSubjectInput {
+  code: String!
+  name: String!
+}
+
 input CreateUserInput {
+  contact: String
+  dateOfBirth: String!
   email: String!
   firstName: String!
+  gender: String!
   lastName: String!
   password: String!
+  profileImg: String
   role: Role
+  subjectUid: String
   username: String!
 }
 
 type Mutation {
+  addStudendToClass(AddStudendToClassInput: AddStudentToClassroomInput!): AddStudentsResponse!
+  createClassroom(createClassroomInput: CreateClassroomInput!): Classroom!
   createStudent(createUserInput: CreateUserInput!): User!
+  createSuject(createUserInput: CreateSubjectInput!): Subject!
   createTeacher(createUserInput: CreateUserInput!): User!
   signIn(signInDto: SignUpDto!): SignUpResponse!
   signUp(signUpDto: SignUpDto!): SignUpResponse!
 }
 
 type Query {
+  getClassroomDetail(classUid: String!): Classroom!
+  getClassrooms: [Classroom!]!
+  getStudents: [User!]!
+  getSubject(uid: String!): Subject!
+  getSubjects: [Subject!]!
+  getTeachers: [User!]!
   getUser(uid: String!): User!
   getUsers: [User!]!
 }
@@ -44,10 +88,22 @@ type SignUpResponse {
   username: String!
 }
 
+type Subject {
+  code: String!
+  name: String!
+  teachers: [User!]
+  uid: String!
+}
+
 type User {
+  Subject: Subject
+  contact: String
+  dateOfBirth: String!
   email: String!
   firstName: String!
+  gender: String!
   lastName: String!
+  profileImg: String
   role: String!
   uid: String!
   username: String!

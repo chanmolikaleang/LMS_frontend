@@ -8,16 +8,31 @@ generator client {
 }
 
 model User {
-  id        BigInt  @id @default(autoincrement())
-  uid       String  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username  String
-  firstName String
-  lastName  String
-  email     String  @unique
-  hashed    String
-  role      Role
-  Class     Class?  @relation(fields: [classId], references: [id])
-  classId   BigInt?
+  id          BigInt  @id @default(autoincrement())
+  uid         String  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username    String
+  firstName   String
+  lastName    String
+  email       String  @unique
+  profileImg  String?
+  gender      Gender?
+  contact     String?
+  dateOfBirth String?
+  hashed      String
+  role        Role
+  classId     BigInt?
+  subjectId   BigInt?
+
+  studentOf Classroom[] @relation("StudentClass")
+  teacherOf Classroom[] @relation("TeacherClass")
+
+  Attendance Attendance[]
+  Subject    Subject?     @relation(fields: [subjectId], references: [id])
+}
+
+enum Gender {
+  Male
+  Female
 }
 
 enum Role {
@@ -26,9 +41,36 @@ enum Role {
   Student
 }
 
-model Class {
-  id   BigInt @id @default(autoincrement())
-  uid  String @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name String
-  user User[]
+model Classroom {
+  id         BigInt       @id @default(autoincrement())
+  uid        String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  code       String
+  year       String
+  students   User[]       @relation("StudentClass")
+  teacher    User?        @relation("TeacherClass", fields: [teacherId], references: [id])
+  Attendance Attendance[]
+  teacherId  BigInt?
+  subject    Subject[]    @relation("ClassSubjects")
+}
+
+model Subject {
+  id         BigInt       @id @default(autoincrement())
+  uid        String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  code       String
+  Attendance Attendance[]
+  Teachers   User[]
+  Classroom  Classroom[]  @relation("ClassSubjects")
+}
+
+model Attendance {
+  id          BigInt    @id @default(autoincrement())
+  uid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student     User      @relation(fields: [userId], references: [id])
+  userId      BigInt
+  class       Classroom @relation(fields: [classroomId], references: [id])
+  classroomId BigInt
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  subjectId   BigInt
 }

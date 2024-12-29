@@ -1,9 +1,15 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Subject } from 'src/subject/entity/subject.entity';
 
 export enum Role {
   Admin = 'Admin',
   Teacher = 'Teacher',
   Student = 'Student',
+}
+
+export enum Gender {
+  Male = 'Male',
+  Female = 'Female',
 }
 
 @ObjectType()
@@ -25,6 +31,22 @@ export class User {
 
   @Field()
   lastName: string;
+
+  @Field({ nullable: true })
+  profileImg: string;
+
+  @Field({ nullable: true })
+  contact: string;
+
+  @Field()
+  dateOfBirth: string;
+
+  @Field()
+  gender: Gender;
+
+  @Field({ nullable: true })
+  Subject: Subject;
 }
 
 registerEnumType(Role, { name: 'Role' });
+registerEnumType(Gender, { name: 'Gender' });

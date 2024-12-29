@@ -15,6 +15,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/role/roles.guard';
 import { AtGuard } from './common/guards';
 import { PermissionsGuard } from './common/guards/permission.guard';
+import { ClassroomModule } from './classroom/classroom.module';
+import { AttendanceService } from './attendance/attendance.service';
+import { AttendanceResolver } from './attendance/attendance.resolver';
+import { AttendanceModule } from './attendance/attendance.module';
+import { SubjectService } from './subject/subject.service';
+import { SubjectModule } from './subject/subject.module';
 
 @Module({
   imports: [
@@ -32,6 +38,9 @@ import { PermissionsGuard } from './common/guards/permission.guard';
     UserModule,
     PrismaModule,
     AuthModule,
+    ClassroomModule,
+    AttendanceModule,
+    SubjectModule,
   ],
   controllers: [AppController],
   // providers: [AppService, AppResolver],
@@ -45,6 +54,9 @@ import { PermissionsGuard } from './common/guards/permission.guard';
       useClass: PermissionsGuard,
     },
     AppService,
+    AttendanceService,
+    AttendanceResolver,
+    SubjectService,
   ],
 })
 export class AppModule {}
