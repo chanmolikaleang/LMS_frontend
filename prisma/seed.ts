@@ -27,7 +27,7 @@ async function seed() {
   // Create default user
   console.log(chalk.blue('Creating default user...'));
   const defaultUser = {
-    username: 'Admin',
+    username: 'admin',
     firstName: 'Admin',
     lastName: 'User',
     hashed: hashedPassword,
