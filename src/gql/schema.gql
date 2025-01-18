@@ -72,7 +72,6 @@ input CreateUserInput {
   password: String!
   profileImg: String
   role: Role
-  subjectUid: String
   username: String!
 }
 
