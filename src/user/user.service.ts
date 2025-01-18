@@ -9,7 +9,7 @@ export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async createTeacher(createUserInput: CreateUserInput) {
-    const { password, subjectUid, gender, ...rest } = createUserInput;
+    const { password, gender, ...rest } = createUserInput;
 
     const hashed = await hashData(password);
 
@@ -20,9 +20,6 @@ export class UserService {
           hashed,
           role: Role.Teacher,
           gender: gender as Gender,
-          Subject: {
-            connect: { uid: subjectUid },
-          },
         },
       });
 
