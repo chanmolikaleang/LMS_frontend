@@ -26,8 +26,13 @@ model User {
   studentOf Classroom[] @relation("StudentClass")
   teacherOf Classroom[] @relation("TeacherClass")
 
+  instructorOf    Course[] @relation("instructoreCourse")
+  studentOfCourse Course[] @relation("studentCourse")
+
   Attendance Attendance[]
   Subject    Subject?     @relation(fields: [subjectId], references: [id])
+
+  Progress Progress[]
 }
 
 enum Gender {
@@ -73,4 +78,51 @@ model Attendance {
   classroomId BigInt
   subject     Subject   @relation(fields: [subjectId], references: [id])
   subjectId   BigInt
+}
+
+enum CourseStatus {
+  Draft
+  Public
+  Deleted
+}
+
+enum CourseType {
+  Free
+  Paid
+}
+
+model Course {
+  id            BigInt        @id @default(autoincrement())
+  uid           String        @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  describtion   String
+  price         String?
+  status        CourseStatus?
+  type          CourseType?
+  coverImageUrl String?
+  instructor    User[]        @relation("instructoreCourse")
+  student       User[]        @relation("studentCourse")
+
+  material Material[]
+  Progress Progress[]
+}
+
+model Material {
+  id          BigInt  @id @default(autoincrement())
+  uid         String  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  describtion String
+  video_url   String
+  Course      Course? @relation(fields: [courseId], references: [id])
+  courseId    BigInt?
+}
+
+model Progress {
+  id         BigInt   @id @default(autoincrement())
+  student    User     @relation(fields: [userId], references: [id])
+  userId     BigInt
+  course     Course   @relation(fields: [courseId], references: [id])
+  courseId   BigInt
+  percentage Float    @default(0)
+  updatedAt  DateTime @updatedAt
 }

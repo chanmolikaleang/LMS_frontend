@@ -38,10 +38,10 @@ export class User {
   @Field({ nullable: true })
   contact: string;
 
-  @Field()
+  @Field({ nullable: true })
   dateOfBirth: string;
 
-  @Field()
+  @Field({ nullable: true })
   gender: Gender;
 
   @Field({ nullable: true })

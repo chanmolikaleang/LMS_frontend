@@ -51,14 +51,14 @@ export class AuthService {
       data: {
         email: signUp.email.toLowerCase(),
         username: signUp.username,
-        firstName: signUp.firstName,
-        lastName: signUp.lastName,
+        firstName: signUp.firstname,
+        lastName: signUp.lastname,
         hashed,
-        role: Role.Admin,
+        role: Role.Student,
       },
     });
 
-    const { username, email } = newUser;
+    const { username, email, role, uid } = newUser;
 
     const access_token = await getTokens(
       newUser.uid,
@@ -67,6 +67,8 @@ export class AuthService {
     );
 
     return {
+      uid,
+      role,
       username,
       access_token,
       email,
@@ -98,7 +100,7 @@ export class AuthService {
 
     const access_token = await getTokens(uid, email, role);
     return {
-      // uid,
+      uid,
       email,
       username,
       access_token,

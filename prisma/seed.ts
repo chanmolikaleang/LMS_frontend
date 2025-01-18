@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { Gender, PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { Gender, Role } from 'src/user/entities/user.entity';
 const chalk = require('chalk');
 const p = require('cli-progress');
 
