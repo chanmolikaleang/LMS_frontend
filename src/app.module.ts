@@ -21,6 +21,7 @@ import { AttendanceResolver } from './attendance/attendance.resolver';
 import { AttendanceModule } from './attendance/attendance.module';
 import { SubjectService } from './subject/subject.service';
 import { SubjectModule } from './subject/subject.module';
+import { CourseModule } from './course/course.module';
 
 @Module({
   imports: [
@@ -41,14 +42,15 @@ import { SubjectModule } from './subject/subject.module';
     ClassroomModule,
     AttendanceModule,
     SubjectModule,
+    CourseModule,
   ],
   controllers: [AppController],
   // providers: [AppService, AppResolver],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AtGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AtGuard,
+    // },
     {
       provide: APP_GUARD,
       useClass: PermissionsGuard,

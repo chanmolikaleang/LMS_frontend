@@ -19,12 +19,42 @@ type Classroom {
   uid: String!
 }
 
+type Course {
+  coverImageUrl: String
+  describtion: String
+  instructor: [User!]
+  material: [Material!]!
+  name: String!
+  price: String
+  progress: [Progress!]
+  status: String
+  student: [User!]
+  type: String
+  uid: String!
+}
+
+input CourseEnrollmentInput {
+  courseUid: String!
+  studentUid: String!
+}
+
 input CreateClassroomInput {
   code: String!
   name: String!
   studentUids: [String!]
   teacherUid: String!
   year: String!
+}
+
+input CreateCourseInput {
+  coverImageUrl: String
+  describtion: String!
+  instructorUid: String!
+  material: [MaterialInput!]!
+  name: String!
+  price: String
+  status: String
+  type: String
 }
 
 input CreateSubjectInput {
@@ -46,9 +76,28 @@ input CreateUserInput {
   username: String!
 }
 
+type EnrollmentResponse {
+  message: String!
+}
+
+type Material {
+  describtion: String!
+  title: String!
+  uid: String!
+  video_url: String
+}
+
+input MaterialInput {
+  describtion: String!
+  title: String!
+  video_url: String!
+}
+
 type Mutation {
   addStudendToClass(AddStudendToClassInput: AddStudentToClassroomInput!): AddStudentsResponse!
+  courseEnrrolment(CourseEnrollmentInput: CourseEnrollmentInput!): EnrollmentResponse!
   createClassroom(createClassroomInput: CreateClassroomInput!): Classroom!
+  createCourse(createCourseInput: CreateCourseInput!): Course!
   createStudent(createUserInput: CreateUserInput!): User!
   createSuject(createUserInput: CreateSubjectInput!): Subject!
   createTeacher(createUserInput: CreateUserInput!): User!
@@ -56,9 +105,17 @@ type Mutation {
   signUp(signUpDto: SignUpDto!): SignUpResponse!
 }
 
+type Progress {
+  percentage: Float
+}
+
 type Query {
   getClassroomDetail(classUid: String!): Classroom!
   getClassrooms: [Classroom!]!
+  getCourse(courseUid: String!): Course!
+  getCourses: [Course!]!
+  getInstructorCourses(instructorUid: String!): [Course!]!
+  getStudentCourses(studentUid: String!): [Course!]!
   getStudents: [User!]!
   getSubject(uid: String!): Subject!
   getSubjects: [Subject!]!
@@ -76,8 +133,8 @@ enum Role {
 input SignUpDto {
   confirmPassword: String!
   email: String!
-  firstName: String!
-  lastName: String!
+  firstname: String!
+  lastname: String!
   password: String!
   username: String!
 }
@@ -85,6 +142,8 @@ input SignUpDto {
 type SignUpResponse {
   access_token: String!
   email: String!
+  role: String!
+  uid: String!
   username: String!
 }
 
@@ -98,10 +157,10 @@ type Subject {
 type User {
   Subject: Subject
   contact: String
-  dateOfBirth: String!
+  dateOfBirth: String
   email: String!
   firstName: String!
-  gender: String!
+  gender: String
   lastName: String!
   profileImg: String
   role: String!

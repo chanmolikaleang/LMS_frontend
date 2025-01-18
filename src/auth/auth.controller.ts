@@ -7,9 +7,10 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @HttpCode(HttpStatus.CREATED)
+  @Public()
   @Post('signUp')
   signUp(@Body() signUp: SignUpDto): Promise<SignUpResponse> {
+    console.log('Email before validation:', signUp.email);
     return this.authService.register(signUp);
   }
 

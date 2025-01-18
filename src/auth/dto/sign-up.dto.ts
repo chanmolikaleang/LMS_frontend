@@ -11,12 +11,12 @@ export class SignUpDto {
   @Field()
   @IsNotEmpty()
   @IsString()
-  firstName: string;
+  firstname: string;
 
   @Field()
   @IsNotEmpty()
   @IsString()
-  lastName: string;
+  lastname: string;
 
   @Field()
   @IsNotEmpty()
@@ -50,6 +50,9 @@ export class SignInDto {
 @ObjectType()
 export class SignUpResponse {
   @Field()
+  uid: string;
+
+  @Field()
   username: string;
 
   @Field()
@@ -57,10 +60,16 @@ export class SignUpResponse {
 
   @Field()
   email: string;
+
+  @Field()
+  role: string;
 }
 
 @ObjectType()
 export class SignInResponse {
+  @Field()
+  uid: string;
+
   @Field()
   username: string;
 
