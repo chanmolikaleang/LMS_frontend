@@ -101,7 +101,7 @@ export class UserService {
         },
       });
 
-      return users; // Returns an empty array if no users are found
+      return users;
     } catch (error) {
       throw new Error('Failed to fetch users.');
     }
