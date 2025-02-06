@@ -130,11 +130,17 @@ enum Role {
 }
 
 input SignUpDto {
+  address: String!
   confirmPassword: String!
+  contact: String!
   email: String!
   firstname: String!
+  gradeLevel: String!
   lastname: String!
+  major: String!
   password: String!
+  profileImg: String!
+  school: String!
   username: String!
 }
 

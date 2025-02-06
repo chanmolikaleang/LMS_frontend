@@ -10,6 +10,7 @@ import { PrismaClient, Role } from '@prisma/client';
 import { getTokens, hashData } from 'src/utils';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
+  InstructorSignUpDto,
   SignInDto,
   SignInResponse,
   SignUpDto,
@@ -55,6 +56,12 @@ export class AuthService {
         lastName: signUp.lastname,
         hashed,
         role: Role.Student,
+        address: signUp.address,
+        school: signUp.school,
+        gradeLevel: signUp.gradeLevel,
+        major: signUp.major,
+        contact: signUp.contact,
+        profileImg: signUp.profileImg,
       },
     });
 
@@ -72,6 +79,87 @@ export class AuthService {
       username,
       access_token,
       email,
+    };
+  }
+
+  async instructorRegister(
+    signUp: InstructorSignUpDto,
+  ): Promise<SignUpResponse> {
+    // Retrieve tenantId from the request
+    const tenantId = this.request['tenantId'];
+    this.prisma = this.prismaService.getClient(tenantId);
+
+    if (signUp.password !== signUp.confirmPassword) {
+      throw new BadRequestException(
+        'Password and confirm password do not match',
+      );
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: signUp.email.toLowerCase() },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    const hashedPassword = await hashData(signUp.password);
+
+    const newInstructor = await this.prisma.user.create({
+      data: {
+        email: signUp.email.toLowerCase(),
+        username: signUp.username,
+        firstName: signUp.firstname,
+        lastName: signUp.lastname,
+        hashed: hashedPassword,
+        role: Role.Teacher,
+        address: signUp.address,
+        qualification: signUp.qualification,
+        experienceYears: signUp.experienceYears,
+        specialization: signUp.specialization,
+        contact: signUp.contact,
+        profileImg: signUp.profileImg,
+      },
+    });
+
+    // Add Work Experiences if provided
+    if (signUp.workExperiences && signUp.workExperiences.length > 0) {
+      await this.prisma.workExperience.createMany({
+        data: signUp.workExperiences.map((exp) => ({
+          teacherId: newInstructor.id, // Link to instructor
+          company: exp.company,
+          position: exp.position,
+          startYear: exp.startYear,
+          endYear: exp.endYear || null,
+          description: exp.description || null,
+        })),
+      });
+    }
+
+    if (signUp.achievement && signUp.achievement.length > 0) {
+      await this.prisma.achievement.createMany({
+        data: signUp.achievement.map((exp) => ({
+          studentId: newInstructor.id,
+          title: exp.title,
+          description: exp.description,
+          dateEarned: exp.dateEarned,
+        })),
+      });
+    }
+
+    // Generate Access Token
+    const access_token = await getTokens(
+      newInstructor.uid,
+      newInstructor.email,
+      newInstructor.role,
+    );
+
+    return {
+      uid: newInstructor.uid,
+      role: newInstructor.role,
+      username: newInstructor.username,
+      access_token,
+      email: newInstructor.email,
     };
   }
 

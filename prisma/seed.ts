@@ -18,6 +18,9 @@ async function seed() {
   await prisma.attendance.deleteMany();
   await prisma.subject.deleteMany();
   await prisma.classroom.deleteMany();
+  await prisma.achievement.deleteMany();
+  await prisma.attendance.deleteMany();
+  await prisma.workExperience.deleteMany();
   console.log(chalk.green('Existing data deleted.'));
 
   const progressBar = new p.SingleBar({}, p.Presets.shades_classic);
