@@ -26,6 +26,12 @@ export class CreateCourseInput {
 
   @Field({ nullable: true })
   coverImageUrl: string;
+
+  @Field(() => [String])
+  categoryUid: string[];
+
+  @Field({ nullable: true })
+  level: string;
 }
 
 @InputType()
@@ -47,4 +53,25 @@ export class CourseEnrollmentInput {
 
   @Field()
   studentUid: string;
+}
+
+@InputType()
+export class ReviewCourseInput {
+  @Field()
+  studentUid: string;
+
+  @Field()
+  courseUid: string;
+
+  @Field({ nullable: true })
+  rating: number;
+
+  @Field({ nullable: true })
+  comment: string;
+}
+
+@InputType()
+export class CreateCategoryInput {
+  @Field()
+  name: string;
 }
