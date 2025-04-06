@@ -43,7 +43,9 @@ model User {
   Attendance Attendance[]
   Subject    Subject?     @relation(fields: [subjectId], references: [id])
 
-  Progress Progress[]
+  Progress       Progress[]
+  CourseProgress CourseProgress[]
+  Review         Review[]
 }
 
 model WorkExperience {
@@ -138,32 +140,75 @@ model Course {
   name          String
   describtion   String
   price         String?
+  level         String?
   status        CourseStatus?
   type          CourseType?
   coverImageUrl String?
   instructor    User[]        @relation("instructoreCourse")
   student       User[]        @relation("studentCourse")
 
-  material Material[]
-  Progress Progress[]
+  material       Material[]
+  Progress       Progress[]
+  CourseProgress CourseProgress[]
+  Review         Review[]
+  avgRating      Float?           @default(0)
+
+  categories Category[]
 }
 
 model Material {
-  id          BigInt  @id @default(autoincrement())
-  uid         String  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          BigInt     @id @default(autoincrement())
+  uid         String     @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String
   describtion String
   video_url   String
-  Course      Course? @relation(fields: [courseId], references: [id])
+  Course      Course?    @relation(fields: [courseId], references: [id])
   courseId    BigInt?
+  Progress    Progress[]
 }
 
 model Progress {
   id         BigInt   @id @default(autoincrement())
+  uid        String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   student    User     @relation(fields: [userId], references: [id])
   userId     BigInt
   course     Course   @relation(fields: [courseId], references: [id])
   courseId   BigInt
-  percentage Float    @default(0)
+  material   Material @relation(fields: [materialId], references: [id])
+  materialId BigInt
+  percentage Float    @default(0) // Per video progress (0-100)
+  completed  Boolean  @default(false) // Mark as watched if >= 90%
   updatedAt  DateTime @updatedAt
+}
+
+model CourseProgress {
+  id         BigInt   @id @default(autoincrement())
+  uid        String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student    User     @relation(fields: [userId], references: [id])
+  userId     BigInt
+  course     Course   @relation(fields: [courseId], references: [id])
+  courseId   BigInt
+  percentage Float    @default(0) // Overall course progress (0-100)
+  updatedAt  DateTime @updatedAt
+}
+
+model Review {
+  id        BigInt   @id @default(autoincrement())
+  uid       String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    BigInt
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  BigInt
+  rating    Float    @default(0)
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        BigInt   @id @default(autoincrement())
+  uid       String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @unique
+  courses   Course[]
+  createdAt DateTime @default(now())
 }

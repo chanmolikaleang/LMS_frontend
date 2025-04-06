@@ -87,6 +87,9 @@ export class SignUpResponse {
 
   @Field()
   role: string;
+
+  @Field({ nullable: true })
+  profileImg: string;
 }
 
 @ObjectType()
@@ -105,6 +108,9 @@ export class SignInResponse {
 
   @Field()
   role: string;
+
+  @Field({ nullable: true })
+  profileImg: string;
 }
 
 @InputType()

@@ -65,7 +65,7 @@ export class AuthService {
       },
     });
 
-    const { username, email, role, uid } = newUser;
+    const { username, email, role, uid, profileImg } = newUser;
 
     const access_token = await getTokens(
       newUser.uid,
@@ -79,6 +79,7 @@ export class AuthService {
       username,
       access_token,
       email,
+      profileImg,
     };
   }
 
@@ -160,6 +161,7 @@ export class AuthService {
       username: newInstructor.username,
       access_token,
       email: newInstructor.email,
+      profileImg: newInstructor.profileImg,
     };
   }
 
@@ -180,7 +182,7 @@ export class AuthService {
     // if (!isMatched) throw new ForbiddenException('Incorrect Credentials');
 
     // let role: string = '';
-    const { uid, email, username, role } = user;
+    const { uid, email, username, role, profileImg } = user;
 
     // if (user && user.role) role = user.role.roleName;
 
@@ -193,6 +195,7 @@ export class AuthService {
       username,
       access_token,
       role,
+      profileImg,
     };
   }
 }

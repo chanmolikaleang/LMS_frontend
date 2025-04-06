@@ -2,6 +2,27 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Achievement {
+  dateEarned: String!
+  description: String!
+  title: String!
+  uid: String!
+}
+
+input AchievementDetails {
+  dateEarned: String!
+  description: String!
+  title: String!
+  uid: String
+}
+
+input AddAchievementInput {
+  dateEarned: String!
+  description: String!
+  title: String!
+  userUid: String!
+}
+
 input AddStudentToClassroomInput {
   classroomUid: String!
   studentUids: [String!]
@@ -9,6 +30,20 @@ input AddStudentToClassroomInput {
 
 type AddStudentsResponse {
   message: String!
+}
+
+input AddWorkExperienceInput {
+  company: String!
+  description: String!
+  endYear: Float
+  position: String!
+  startYear: Float!
+  userUid: String!
+}
+
+type Category {
+  name: String
+  uid: String
 }
 
 type Classroom {
@@ -20,9 +55,14 @@ type Classroom {
 }
 
 type Course {
+  Review: [Review!]
+  avgRating: Float
+  categories: [Category!]
+  courseProgress: [CourseProgress!]
   coverImageUrl: String
   describtion: String
   instructor: [User!]
+  level: String
   material: [Material!]!
   name: String!
   price: String
@@ -38,6 +78,31 @@ input CourseEnrollmentInput {
   studentUid: String!
 }
 
+type CourseProgress {
+  percentage: Float
+  uid: String
+}
+
+type CourseWithProgress {
+  Review: [Review!]
+  avgRating: Float
+  categories: [Category!]
+  courseProgress: CourseProgress
+  coverImageUrl: String
+  describtion: String
+  instructor: [User!]
+  level: String
+  material: [MaterialWithProgress!]!
+  name: String!
+  price: String
+  progress: [Progress!]
+  status: String
+  student: [User!]
+  studentProgress: [StudentProgress!]
+  type: String
+  uid: String!
+}
+
 input CreateClassroomInput {
   code: String!
   name: String!
@@ -47,9 +112,11 @@ input CreateClassroomInput {
 }
 
 input CreateCourseInput {
+  categoryUid: [String!]!
   coverImageUrl: String
   describtion: String!
   instructorUid: String!
+  level: String
   material: [MaterialInput!]!
   name: String!
   price: String
@@ -75,6 +142,15 @@ input CreateUserInput {
   username: String!
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type DeleteCourseResponse {
+  message: String!
+}
+
 type EnrollmentResponse {
   message: String!
 }
@@ -92,35 +168,82 @@ input MaterialInput {
   video_url: String!
 }
 
+type MaterialWithProgress {
+  completed: Boolean
+  describtion: String
+  percentage: Float
+  title: String
+  uid: String!
+  video_url: String
+}
+
 type Mutation {
+  AddAchievement(addAchievementInput: AddAchievementInput!): Achievement!
+  AddWorkExperience(addWorkExperienceInput: AddWorkExperienceInput!): WorkExperience!
   addStudendToClass(AddStudendToClassInput: AddStudentToClassroomInput!): AddStudentsResponse!
+  assignCategoriesToCourse(categoryUids: [String!]!, courseUid: String!): Course!
   courseEnrrolment(CourseEnrollmentInput: CourseEnrollmentInput!): EnrollmentResponse!
+  createCategory(name: String!): Category!
   createClassroom(createClassroomInput: CreateClassroomInput!): Classroom!
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createStudent(createUserInput: CreateUserInput!): User!
   createSuject(createUserInput: CreateSubjectInput!): Subject!
   createTeacher(createUserInput: CreateUserInput!): User!
+  deleteCourse(courseUid: String!): DeleteCourseResponse!
+  deleteReviewCourse(deleteReviewCourse: String!): DeleteCourseResponse!
+  reviewCourse(reviewCourseInput: ReviewCourseInput!): Review!
   signIn(signInDto: SignUpDto!): SignUpResponse!
   signUp(signUpDto: SignUpDto!): SignUpResponse!
+  updateAchievement(updateAchievementInput: UpdateAchievementIuput!): User!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
+  updateOneAchievement(updateAchievementInput: UpdateOneAchievementInput!): Achievement!
+  updateOneWorkExperience(updateWorkExperienceInput: UpdateOneWorkExperienceInput!): WorkExperience!
+  updatePersonalInformation(updatePersonalInformationInput: UpdatePersonalInformationInput!): User!
+  updateReviewCourse(updateReviewCourse: UpdateReviewCourseInput!): Review!
+  updateVideoProgress(materialUid: String!, percentage: Float!, studentUid: String!): updateVideoProgressResponse!
+  updateWorkAndEducation(updateWorkAndEducationInput: UpdateWorkAndEducationInput!): User!
+  updateWorkExperience(updateWorkExperienceInput: UpdateWorkExperienceInput!): User!
 }
 
 type Progress {
   percentage: Float
+  uid: String
 }
 
 type Query {
+  getAchievement(uid: String!): Achievement!
+  getAllCourseWithProgress(studentUid: String!): [CourseWithProgress!]!
+  getCategories: [Category!]!
   getClassroomDetail(classUid: String!): Classroom!
   getClassrooms: [Classroom!]!
   getCourse(courseUid: String!): Course!
+  getCourseWithProgress(courseUid: String!, studentUid: String!): CourseWithProgress!
   getCourses: [Course!]!
   getInstructorCourses(instructorUid: String!): [Course!]!
+  getInstructorWorkExperrience(uid: String!): WorkExperience!
   getStudentCourses(studentUid: String!): [Course!]!
   getStudents: [User!]!
   getSubject(uid: String!): Subject!
   getSubjects: [Subject!]!
   getTeachers: [User!]!
   getUser(uid: String!): User!
+  getUserProfile(uid: String!): User!
   getUsers: [User!]!
+  getWorkExperrience(uid: String!): WorkExperience!
+}
+
+type Review {
+  comment: String
+  rating: Float!
+  student: User
+  uid: String!
+}
+
+input ReviewCourseInput {
+  comment: String
+  courseUid: String!
+  rating: Float
+  studentUid: String!
 }
 
 enum Role {
@@ -147,9 +270,15 @@ input SignUpDto {
 type SignUpResponse {
   access_token: String!
   email: String!
+  profileImg: String
   role: String!
   uid: String!
   username: String!
+}
+
+type StudentProgress {
+  completed: Boolean!
+  percentage: Float!
 }
 
 type Subject {
@@ -159,16 +288,115 @@ type Subject {
   uid: String!
 }
 
+input UpdateAchievementIuput {
+  achievement: [AchievementDetails!]
+  uid: String!
+}
+
+input UpdateCourseInput {
+  coverImageUrl: String
+  describtion: String!
+  instructorUid: String!
+  material: [MaterialInput!]!
+  name: String!
+  price: String
+  status: String
+  type: String
+  uid: String!
+}
+
+input UpdateOneAchievementInput {
+  dateEarned: String!
+  description: String!
+  title: String!
+  uid: String!
+}
+
+input UpdateOneWorkExperienceInput {
+  company: String!
+  description: String
+  endYear: Float
+  position: String!
+  startYear: Float!
+  uid: String!
+}
+
+input UpdatePersonalInformationInput {
+  address: String
+  contact: String
+  dateOfBirth: String!
+  email: String!
+  firstName: String!
+  gender: String!
+  lastName: String!
+  profileImg: String
+  uid: String!
+  username: String!
+}
+
+input UpdateReviewCourseInput {
+  comment: String
+  rating: Float!
+  uid: String!
+}
+
+input UpdateWorkAndEducationInput {
+  experienceYears: String
+  gradeLevel: String
+  major: String
+  qualification: String
+  school: String
+  specialization: String
+  uid: String!
+}
+
+input UpdateWorkExperienceDetails {
+  company: String!
+  description: String
+  endYear: Float
+  position: String!
+  startYear: Float!
+  uid: String
+}
+
+input UpdateWorkExperienceInput {
+  uid: String!
+  workExperiences: [UpdateWorkExperienceDetails!]!
+}
+
 type User {
   Subject: Subject
+  achievements: [Achievement!]
+  address: String
   contact: String
   dateOfBirth: String
   email: String!
+  experienceYears: String
   firstName: String!
   gender: String
+  gradeLevel: String
+  joinedAt: DateTime
   lastName: String!
+  mojro: String
   profileImg: String
+  qualification: String
   role: String!
+  school: String
+  specialization: String
   uid: String!
   username: String!
+  workExperiences: [WorkExperience!]
+}
+
+type WorkExperience {
+  company: String!
+  description: String
+  endYear: Float
+  position: String!
+  startYear: Float!
+  uid: String!
+}
+
+type updateVideoProgressResponse {
+  message: String!
 }
