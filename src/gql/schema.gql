@@ -41,9 +41,21 @@ input AddWorkExperienceInput {
   userUid: String!
 }
 
+type AdminDashboardDto {
+  charts: ChartDataDto!
+  summary: SummaryDto!
+}
+
 type Category {
   name: String
   uid: String
+}
+
+type ChartDataDto {
+  courseTrend: [MonthlyTrendDto!]!
+  coursesPerCategory: [CoursesPerCategoryDto!]!
+  roleDistribution: [RoleDistributionDto!]!
+  studentSignupTrend: [MonthlyTrendDto!]!
 }
 
 type Classroom {
@@ -83,6 +95,11 @@ type CourseProgress {
   uid: String
 }
 
+type CourseStudentStat {
+  courseName: String!
+  studentCount: Int!
+}
+
 type CourseWithProgress {
   Review: [Review!]
   avgRating: Float
@@ -101,6 +118,11 @@ type CourseWithProgress {
   studentProgress: [StudentProgress!]
   type: String
   uid: String!
+}
+
+type CoursesPerCategoryDto {
+  category: String!
+  count: Int!
 }
 
 input CreateClassroomInput {
@@ -155,6 +177,13 @@ type EnrollmentResponse {
   message: String!
 }
 
+type InstructorDashboardStats {
+  averageRating: Float!
+  studentPerCourse: [CourseStudentStat!]!
+  totalCourses: Int!
+  totalStudents: Int!
+}
+
 type Material {
   describtion: String!
   title: String!
@@ -177,6 +206,11 @@ type MaterialWithProgress {
   video_url: String
 }
 
+type MonthlyTrendDto {
+  count: Int!
+  month: String!
+}
+
 type Mutation {
   AddAchievement(addAchievementInput: AddAchievementInput!): Achievement!
   AddWorkExperience(addWorkExperienceInput: AddWorkExperienceInput!): WorkExperience!
@@ -184,6 +218,7 @@ type Mutation {
   assignCategoriesToCourse(categoryUids: [String!]!, courseUid: String!): Course!
   courseEnrrolment(CourseEnrollmentInput: CourseEnrollmentInput!): EnrollmentResponse!
   createCategory(name: String!): Category!
+  createCheckout(courseUid: String!, price: Float!, userUid: String!): String!
   createClassroom(createClassroomInput: CreateClassroomInput!): Classroom!
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createStudent(createUserInput: CreateUserInput!): User!
@@ -212,6 +247,7 @@ type Progress {
 
 type Query {
   getAchievement(uid: String!): Achievement!
+  getAdminDashboard: AdminDashboardDto!
   getAllCourseWithProgress(studentUid: String!): [CourseWithProgress!]!
   getCategories: [Category!]!
   getClassroomDetail(classUid: String!): Classroom!
@@ -222,9 +258,11 @@ type Query {
   getInstructorCourses(instructorUid: String!): [Course!]!
   getInstructorWorkExperrience(uid: String!): WorkExperience!
   getStudentCourses(studentUid: String!): [Course!]!
+  getStudentRecommendCourses(studentUid: String!): [Course!]!
   getStudents: [User!]!
   getSubject(uid: String!): Subject!
   getSubjects: [Subject!]!
+  getTeacherDashboard(studentUid: String!): InstructorDashboardStats!
   getTeachers: [User!]!
   getUser(uid: String!): User!
   getUserProfile(uid: String!): User!
@@ -252,13 +290,21 @@ enum Role {
   Teacher
 }
 
+type RoleDistributionDto {
+  count: Int!
+  role: String!
+}
+
 input SignUpDto {
   address: String!
   confirmPassword: String!
   contact: String!
+  dateOfBirth: String!
   email: String!
   firstname: String!
+  gender: String!
   gradeLevel: String!
+  interestedCategoriesUid: [String!]!
   lastname: String!
   major: String!
   password: String!
@@ -286,6 +332,13 @@ type Subject {
   name: String!
   teachers: [User!]
   uid: String!
+}
+
+type SummaryDto {
+  categoryCount: Int!
+  courseCount: Int!
+  instructorCount: Int!
+  studentCount: Int!
 }
 
 input UpdateAchievementIuput {
@@ -375,6 +428,7 @@ type User {
   firstName: String!
   gender: String
   gradeLevel: String
+  interestedCategories: [Category!]
   joinedAt: DateTime
   lastName: String!
   mojro: String

@@ -22,6 +22,8 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { SubjectService } from './subject/subject.service';
 import { SubjectModule } from './subject/subject.module';
 import { CourseModule } from './course/course.module';
+import { PaymentModule } from './payment/payment.module';
+import { WebhookController } from './payment/webhook.controller';
 
 @Module({
   imports: [
@@ -43,8 +45,9 @@ import { CourseModule } from './course/course.module';
     AttendanceModule,
     SubjectModule,
     CourseModule,
+    PaymentModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, WebhookController],
   // providers: [AppService, AppResolver],
   providers: [
     // {

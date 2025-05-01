@@ -129,6 +129,7 @@ export class UserService {
         },
         include: {
           achievements: true,
+          interestedCategories: true,
         },
       });
 

@@ -3,6 +3,7 @@ import { CourseService } from './course.service';
 import { CourseResolver } from './course.resolver';
 
 @Module({
-  providers: [CourseService, CourseResolver]
+  providers: [CourseService, CourseResolver],
+  exports: [CourseService],
 })
 export class CourseModule {}
