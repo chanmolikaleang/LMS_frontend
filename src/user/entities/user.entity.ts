@@ -4,6 +4,7 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
+import { Category } from 'src/course/entity/course.entity';
 import { Subject } from 'src/subject/entity/subject.entity';
 
 export enum Role {
@@ -81,6 +82,9 @@ export class User {
 
   @Field(() => [Achievement], { nullable: true })
   achievements: Achievement[];
+
+  @Field(() => [Category], { nullable: true })
+  interestedCategories: Category[];
 }
 
 @ObjectType()

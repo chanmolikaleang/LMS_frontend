@@ -46,6 +46,9 @@ model User {
   Progress       Progress[]
   CourseProgress CourseProgress[]
   Review         Review[]
+
+  interestedCategories Category[] @relation("UserInterestedCategories")
+  createdAt            DateTime   @default(now())
 }
 
 model WorkExperience {
@@ -146,6 +149,7 @@ model Course {
   coverImageUrl String?
   instructor    User[]        @relation("instructoreCourse")
   student       User[]        @relation("studentCourse")
+  createdAt     DateTime      @default(now())
 
   material       Material[]
   Progress       Progress[]
@@ -211,4 +215,6 @@ model Category {
   name      String   @unique
   courses   Course[]
   createdAt DateTime @default(now())
+
+  interestedUsers User[] @relation("UserInterestedCategories")
 }

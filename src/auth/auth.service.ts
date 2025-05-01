@@ -17,6 +17,7 @@ import {
   SignUpResponse,
 } from './dto/sign-up.dto';
 import { REQUEST } from '@nestjs/core';
+import { Gender } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,6 @@ export class AuthService {
   ) {}
 
   async register(signUp: SignUpDto): Promise<SignUpResponse> {
-    // Retrieve tenantId from the request
     const tenantId = this.request['tenantId'];
     this.prisma = this.prismaService.getClient(tenantId);
 
@@ -48,6 +48,8 @@ export class AuthService {
 
     const hashed = await hashData(signUp.password);
 
+    console.log('Interested Categories UIDs:', signUp.interestedCategoriesUid);
+
     const newUser = await this.prisma.user.create({
       data: {
         email: signUp.email.toLowerCase(),
@@ -55,6 +57,8 @@ export class AuthService {
         firstName: signUp.firstname,
         lastName: signUp.lastname,
         hashed,
+        gender: signUp.gender as Gender,
+        dateOfBirth: signUp.dateOfBirth,
         role: Role.Student,
         address: signUp.address,
         school: signUp.school,
@@ -62,8 +66,13 @@ export class AuthService {
         major: signUp.major,
         contact: signUp.contact,
         profileImg: signUp.profileImg,
+        interestedCategories: {
+          connect: signUp.interestedCategoriesUid.map((uid) => ({ uid })),
+        },
       },
     });
+
+    console.log('New User:', newUser);
 
     const { username, email, role, uid, profileImg } = newUser;
 

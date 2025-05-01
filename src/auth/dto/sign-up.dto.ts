@@ -51,11 +51,22 @@ export class SignUpDto {
 
   @Field()
   @IsString()
+  gender: string;
+
+  @Field()
+  @IsString()
+  dateOfBirth: string;
+
+  @Field()
+  @IsString()
   contact: string;
 
   @Field()
   @IsString()
   profileImg: string;
+
+  @Field(() => [String])
+  interestedCategoriesUid: string[];
 }
 
 @InputType()

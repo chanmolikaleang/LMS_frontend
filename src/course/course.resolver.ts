@@ -21,6 +21,9 @@ import {
 } from './dto/update-course.input';
 import { ADDRCONFIG } from 'dns';
 import { waitForDebugger } from 'inspector';
+import { AdminDashboardDto } from './entity/dashboard.dto';
+import { InstructorDashboardStats } from './entity/instructorDashboard.dto';
+import { GetCurrentUser } from 'src/common/decorators';
 
 @Resolver()
 export class CourseResolver {
@@ -50,6 +53,11 @@ export class CourseResolver {
   @Query(() => [Course], { name: 'getStudentCourses' })
   async getStudentCourses(@Args('studentUid') studentUid: string) {
     return await this.courseService.getStudentCourses(studentUid);
+  }
+
+  @Query(() => [Course], { name: 'getStudentRecommendCourses' })
+  async getStudentRecommendCourses(@Args('studentUid') studentUid: string) {
+    return await this.courseService.getStudentRecommendCourses(studentUid);
   }
 
   @Query(() => Course, { name: 'getCourse' })
@@ -147,5 +155,22 @@ export class CourseResolver {
   @Query(() => [Category], { name: 'getCategories' })
   async getCategories() {
     return await this.courseService.getCategories();
+  }
+
+  @Query(() => AdminDashboardDto, { name: 'getAdminDashboard' })
+  getAdminDashboardData() {
+    return this.courseService.getAdminDashboardData();
+  }
+
+  // @Query(() => InstructorDashboardStats)
+  // async getInstructorDashboard(
+  //   @GetCurrentUser() user: { uid: string },
+  // ): Promise<InstructorDashboardStats> {
+  //   return await this.courseService.getInstructorDashboard(user.uid);
+  // }
+
+  @Query(() => InstructorDashboardStats, { name: 'getTeacherDashboard' })
+  async getInstructorDashboard(@Args('studentUid') studentUid: string) {
+    return await this.courseService.getInstructorDashboard(studentUid);
   }
 }
