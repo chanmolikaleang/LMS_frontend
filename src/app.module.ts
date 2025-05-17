@@ -24,6 +24,8 @@ import { SubjectModule } from './subject/subject.module';
 import { CourseModule } from './course/course.module';
 import { PaymentModule } from './payment/payment.module';
 import { WebhookController } from './payment/webhook.controller';
+import { QuizService } from './quiz/quiz.service';
+import { QuizModule } from './quiz/quiz.module';
 
 @Module({
   imports: [
@@ -46,6 +48,7 @@ import { WebhookController } from './payment/webhook.controller';
     SubjectModule,
     CourseModule,
     PaymentModule,
+    QuizModule,
   ],
   controllers: [AppController, WebhookController],
   // providers: [AppService, AppResolver],
@@ -62,6 +65,7 @@ import { WebhookController } from './payment/webhook.controller';
     AttendanceService,
     AttendanceResolver,
     SubjectService,
+    QuizService,
   ],
 })
 export class AppModule {}
