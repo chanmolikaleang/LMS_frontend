@@ -67,11 +67,13 @@ type Classroom {
 }
 
 type Course {
+  Quiz: [Quiz!]
   Review: [Review!]
   avgRating: Float
   categories: [Category!]
   courseProgress: [CourseProgress!]
   coverImageUrl: String
+  createdAt: DateTime
   describtion: String
   instructor: [User!]
   level: String
@@ -90,6 +92,26 @@ input CourseEnrollmentInput {
   studentUid: String!
 }
 
+type CourseForTeacherPage {
+  Quiz: [Quiz!]
+  Review: [Review!]
+  avgRating: Float
+  categories: [Category!]
+  courseProgress: [CourseProgress!]
+  coverImageUrl: String
+  describtion: String
+  instructor: [User!]
+  level: String
+  material: [Material!]!
+  name: String!
+  price: String
+  progress: [Progress!]
+  status: String
+  student: [StudentWithProgress!]
+  type: String
+  uid: String!
+}
+
 type CourseProgress {
   percentage: Float
   uid: String
@@ -101,11 +123,13 @@ type CourseStudentStat {
 }
 
 type CourseWithProgress {
+  Quiz: [Quiz!]
   Review: [Review!]
   avgRating: Float
   categories: [Category!]
   courseProgress: CourseProgress
   coverImageUrl: String
+  createdAt: DateTime
   describtion: String
   instructor: [User!]
   level: String
@@ -142,8 +166,21 @@ input CreateCourseInput {
   material: [MaterialInput!]!
   name: String!
   price: String
+  quiz: CreateQuizInput
   status: String
   type: String
+}
+
+input CreateQuestionInput {
+  correctAnswerIndex: Int!
+  options: [String!]!
+  score: Int!
+  text: String!
+}
+
+input CreateQuizInput {
+  questions: [CreateQuestionInput!]!
+  title: String!
 }
 
 input CreateSubjectInput {
@@ -186,6 +223,7 @@ type InstructorDashboardStats {
 
 type Material {
   describtion: String!
+  ppt_url: String
   title: String!
   uid: String!
   video_url: String
@@ -193,6 +231,7 @@ type Material {
 
 input MaterialInput {
   describtion: String!
+  ppt_url: String
   title: String!
   video_url: String!
 }
@@ -201,6 +240,7 @@ type MaterialWithProgress {
   completed: Boolean
   describtion: String
   percentage: Float
+  ppt_url: String
   title: String
   uid: String!
   video_url: String
@@ -229,6 +269,7 @@ type Mutation {
   reviewCourse(reviewCourseInput: ReviewCourseInput!): Review!
   signIn(signInDto: SignUpDto!): SignUpResponse!
   signUp(signUpDto: SignUpDto!): SignUpResponse!
+  submitQuiz(submitQuizInput: SubmitQuizInput!): SubmitQuizResult!
   updateAchievement(updateAchievementInput: UpdateAchievementIuput!): User!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   updateOneAchievement(updateAchievementInput: UpdateOneAchievementInput!): Achievement!
@@ -253,10 +294,12 @@ type Query {
   getClassroomDetail(classUid: String!): Classroom!
   getClassrooms: [Classroom!]!
   getCourse(courseUid: String!): Course!
+  getCourseForTeacher(courseUid: String!): CourseForTeacherPage!
   getCourseWithProgress(courseUid: String!, studentUid: String!): CourseWithProgress!
   getCourses: [Course!]!
   getInstructorCourses(instructorUid: String!): [Course!]!
   getInstructorWorkExperrience(uid: String!): WorkExperience!
+  getQuiz(quizUid: String!): Quiz!
   getStudentCourses(studentUid: String!): [Course!]!
   getStudentRecommendCourses(studentUid: String!): [Course!]!
   getStudents: [User!]!
@@ -268,6 +311,35 @@ type Query {
   getUserProfile(uid: String!): User!
   getUsers: [User!]!
   getWorkExperrience(uid: String!): WorkExperience!
+}
+
+type Question {
+  correctAnswerIndex: Float!
+  options: [String!]!
+  score: Float!
+  text: String!
+  uid: String!
+}
+
+type Quiz {
+  courseUid: String!
+  questions: [Question!]!
+  result: [QuizResult!]!
+  title: String!
+  uid: String!
+}
+
+input QuizAnswerInput {
+  questionId: String!
+  selectedIndex: Int!
+}
+
+type QuizResult {
+  answer: String!
+  questions: User!
+  quiz: Quiz!
+  totalScore: Float!
+  uid: String!
 }
 
 type Review {
@@ -327,11 +399,37 @@ type StudentProgress {
   percentage: Float!
 }
 
+type StudentWithProgress {
+  courseProgress: [CourseProgress!]
+  progress: [Progress!]
+  user: User!
+}
+
 type Subject {
   code: String!
   name: String!
   teachers: [User!]
   uid: String!
+}
+
+input SubmitQuizInput {
+  answers: [QuizAnswerInput!]!
+  quizUid: String!
+  studentUid: String!
+}
+
+type SubmitQuizResult {
+  answerDetails: [SubmittedAnswerDetail!]!
+  obtainedScore: Float!
+  totalScore: Float!
+}
+
+type SubmittedAnswerDetail {
+  correctAnswerIndex: Float!
+  isCorrect: Boolean!
+  questionId: String!
+  score: Float!
+  selectedIndex: Float!
 }
 
 type SummaryDto {

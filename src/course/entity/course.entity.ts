@@ -1,4 +1,5 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Quiz } from 'src/quiz/entity/quiz.entity';
 import { User } from 'src/user/entities/user.entity';
 
 export enum CourseStatus {
@@ -94,6 +95,81 @@ export class Course {
 
   @Field({ nullable: true })
   level: string;
+
+  @Field(() => [Quiz], { nullable: true })
+  Quiz: Quiz[];
+
+  @Field({ nullable: true })
+  createdAt: Date;
+}
+
+@ObjectType()
+export class CourseForTeacherPage {
+  @Field()
+  uid: string;
+
+  @Field()
+  name: string;
+
+  @Field({ nullable: true })
+  describtion: string;
+
+  @Field({ nullable: true })
+  price: string;
+
+  @Field({ nullable: true })
+  status: CourseStatus;
+
+  @Field({ nullable: true })
+  type: CourseType;
+
+  @Field(() => [Material])
+  material: Material[];
+
+  // @Field(() => [User], { nullable: true })
+  // student: User[];
+
+  @Field(() => [User], { nullable: true })
+  instructor: User[];
+
+  @Field(() => [Progress], { nullable: true })
+  progress: Progress[];
+
+  @Field(() => [CourseProgress], { nullable: true })
+  courseProgress: CourseProgress[];
+
+  @Field({ nullable: true })
+  coverImageUrl: string;
+
+  @Field({ nullable: true })
+  avgRating: number;
+
+  @Field(() => [Review], { nullable: true })
+  Review: Review;
+
+  @Field(() => [Category], { nullable: true })
+  categories: Category;
+
+  @Field({ nullable: true })
+  level: string;
+
+  @Field(() => [Quiz], { nullable: true })
+  Quiz: Quiz[];
+
+  @Field(() => [StudentWithProgress], { nullable: true })
+  student: StudentWithProgress[];
+}
+
+@ObjectType()
+export class StudentWithProgress {
+  @Field(() => User)
+  user: User;
+
+  @Field(() => [Progress], { nullable: true })
+  progress?: Progress[];
+
+  @Field(() => [CourseProgress], { nullable: true })
+  courseProgress?: CourseProgress[];
 }
 
 @ObjectType()
@@ -148,6 +224,12 @@ export class CourseWithProgress {
 
   @Field({ nullable: true })
   level: string;
+
+  @Field(() => [Quiz], { nullable: true })
+  Quiz: Quiz;
+
+  @Field({ nullable: true })
+  createdAt: Date;
 }
 
 @ObjectType()
@@ -165,10 +247,13 @@ export class MaterialWithProgress {
   video_url: string;
 
   @Field({ nullable: true })
+  ppt_url: string;
+
+  @Field({ nullable: true })
   percentage: number;
 
   @Field({ nullable: true })
-  completed: boolean; // Added field to indicate completion status
+  completed: boolean;
 }
 
 @ObjectType()
@@ -193,6 +278,9 @@ export class Material {
 
   @Field({ nullable: true })
   video_url: string;
+
+  @Field({ nullable: true })
+  ppt_url: string;
 }
 
 @ObjectType()

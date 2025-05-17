@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { CourseStatus, CourseType } from '../entity/course.entity';
+import { CreateQuizInput } from 'src/quiz/dto/create-quiz.input';
 
 @InputType()
 export class CreateCourseInput {
@@ -32,6 +33,9 @@ export class CreateCourseInput {
 
   @Field({ nullable: true })
   level: string;
+
+  @Field(() => CreateQuizInput, { nullable: true })
+  quiz: CreateQuizInput;
 }
 
 @InputType()
@@ -44,6 +48,9 @@ export class MaterialInput {
 
   @Field()
   video_url: string;
+
+  @Field({ nullable: true })
+  ppt_url: string;
 }
 
 @InputType()

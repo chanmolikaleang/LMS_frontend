@@ -3,6 +3,7 @@ import { CourseService } from './course.service';
 import {
   Category,
   Course,
+  CourseForTeacherPage,
   CourseWithProgress,
   DeleteCourseResponse,
   EnrollmentResponse,
@@ -24,6 +25,12 @@ import { waitForDebugger } from 'inspector';
 import { AdminDashboardDto } from './entity/dashboard.dto';
 import { InstructorDashboardStats } from './entity/instructorDashboard.dto';
 import { GetCurrentUser } from 'src/common/decorators';
+import {
+  Quiz,
+  QuizResult,
+  SubmitQuizResult,
+} from 'src/quiz/entity/quiz.entity';
+import { SubmitQuizInput } from 'src/quiz/dto/create-quiz.input';
 
 @Resolver()
 export class CourseResolver {
@@ -63,6 +70,11 @@ export class CourseResolver {
   @Query(() => Course, { name: 'getCourse' })
   async getCourses(@Args('courseUid') courseUid: string) {
     return await this.courseService.getCourse(courseUid);
+  }
+
+  @Query(() => CourseForTeacherPage, { name: 'getCourseForTeacher' })
+  async getCourseForTeacher(@Args('courseUid') courseUid: string) {
+    return await this.courseService.getCourseForTeacher(courseUid);
   }
 
   @Mutation(() => EnrollmentResponse, { name: 'courseEnrrolment' })
@@ -172,5 +184,15 @@ export class CourseResolver {
   @Query(() => InstructorDashboardStats, { name: 'getTeacherDashboard' })
   async getInstructorDashboard(@Args('studentUid') studentUid: string) {
     return await this.courseService.getInstructorDashboard(studentUid);
+  }
+
+  @Query(() => Quiz, { name: 'getQuiz' })
+  async getQuiz(@Args('quizUid') quizUid: string) {
+    return await this.courseService.getQuiz(quizUid);
+  }
+
+  @Mutation(() => SubmitQuizResult, { name: 'submitQuiz' })
+  async submitQuiz(@Args('submitQuizInput') input: SubmitQuizInput) {
+    return this.courseService.submitQuiz(input);
   }
 }

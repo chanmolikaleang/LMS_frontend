@@ -15,6 +15,7 @@ import {
   CourseStudentStat,
   InstructorDashboardStats,
 } from './entity/instructorDashboard.dto';
+import { SubmitQuizInput } from 'src/quiz/dto/create-quiz.input';
 
 @Injectable()
 export class CourseService {
@@ -32,6 +33,7 @@ export class CourseService {
       coverImageUrl,
       categoryUid,
       level,
+      quiz,
     } = createCourseInput;
 
     const user = await this.prismaService.user.findUnique({
@@ -53,8 +55,24 @@ export class CourseService {
             title: mat.title,
             describtion: mat.describtion,
             video_url: mat.video_url,
+            ppt_url: mat.ppt_url,
           })),
         },
+
+        Quiz: {
+          create: {
+            title: quiz.title,
+            questions: {
+              create: quiz.questions.map((question) => ({
+                text: question.text,
+                options: question.options,
+                correctAnswerIndex: question.correctAnswerIndex,
+                score: question.score,
+              })),
+            },
+          },
+        },
+
         instructor: {
           connect: { uid: user.uid },
         },
@@ -91,6 +109,13 @@ export class CourseService {
         },
         categories: true,
         student: true,
+        Quiz: {
+          include: {
+            questions: true,
+            results: true,
+            course: true,
+          },
+        },
       },
     });
 
@@ -116,6 +141,13 @@ export class CourseService {
         },
         categories: true,
         CourseProgress: true,
+        Quiz: {
+          include: {
+            questions: true,
+            results: true,
+            course: true,
+          },
+        },
       },
       orderBy: { id: 'desc' },
     });
@@ -169,9 +201,73 @@ export class CourseService {
           },
         },
         categories: true,
+        Quiz: {
+          include: {
+            questions: true,
+            results: true,
+            course: true,
+          },
+        },
       },
     });
     return course;
+  }
+
+  async getCourseForTeacher(courseUid: string) {
+    const course = await this.prismaService.course.findUnique({
+      where: {
+        uid: courseUid,
+      },
+      include: {
+        instructor: true,
+        material: true,
+        categories: true,
+        Review: {
+          include: {
+            student: true,
+          },
+        },
+        Quiz: {
+          include: {
+            questions: true,
+            results: true,
+          },
+        },
+        student: {
+          include: {
+            CourseProgress: {
+              where: {
+                course: {
+                  uid: courseUid,
+                },
+              },
+            },
+            Progress: {
+              where: {
+                course: {
+                  uid: courseUid,
+                },
+              },
+              include: {
+                material: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Transform student[] into StudentWithProgress[]
+    const studentWithProgress = course.student.map((user) => ({
+      user,
+      progress: user.Progress,
+      courseProgress: user.CourseProgress,
+    }));
+
+    return {
+      ...course,
+      student: studentWithProgress,
+    };
   }
 
   async CourseEnrollment(courseEnrollmentInput: CourseEnrollmentInput) {
@@ -350,6 +446,13 @@ export class CourseService {
           },
         },
         categories: true,
+        Quiz: {
+          include: {
+            questions: true,
+            results: true,
+            course: true,
+          },
+        },
       },
     });
 
@@ -865,6 +968,67 @@ export class CourseService {
       totalStudents,
       averageRating: parseFloat(averageRating.toFixed(2)),
       studentPerCourse,
+    };
+  }
+
+  async getQuiz(uid: string) {
+    const quiz = await this.prismaService.quiz.findUnique({
+      where: { uid },
+      include: {
+        questions: true,
+        results: true,
+        course: true,
+      },
+    });
+
+    if (!quiz) {
+      throw new Error('Quiz not found');
+    }
+
+    return quiz;
+  }
+
+  async submitQuiz(input: SubmitQuizInput) {
+    const quiz = await this.prismaService.quiz.findUnique({
+      where: { uid: input.quizUid },
+      include: { questions: true },
+    });
+
+    if (!quiz) throw new Error('Quiz not found');
+
+    let totalScore = 0;
+    let obtainedScore = 0;
+
+    const answerDetails = quiz.questions.map((question) => {
+      const answer = input.answers.find((a) => a.questionId === question.uid);
+      const isCorrect = answer?.selectedIndex === question.correctAnswerIndex;
+      totalScore += question.score;
+      if (isCorrect) {
+        obtainedScore += question.score;
+      }
+
+      return {
+        questionId: question.uid,
+        selectedIndex: answer?.selectedIndex ?? -1,
+        correctAnswerIndex: question.correctAnswerIndex,
+        isCorrect,
+        score: question.score,
+      };
+    });
+
+    await this.prismaService.quizResult.create({
+      data: {
+        quiz: { connect: { uid: quiz.uid } },
+        student: { connect: { uid: input.studentUid } },
+        totalScore,
+        answers: JSON.parse(JSON.stringify(input.answers)), // Keep raw input in DB
+      },
+    });
+
+    return {
+      totalScore,
+      obtainedScore,
+      answerDetails,
     };
   }
 }
