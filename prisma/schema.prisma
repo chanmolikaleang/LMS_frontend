@@ -157,6 +157,7 @@ model Course {
   CourseProgress CourseProgress[]
   Review         Review[]
   avgRating      Float?           @default(0)
+  docUrls        String[]
 
   categories Category[]
   Quiz       Quiz[]
@@ -245,13 +246,14 @@ model Question {
 }
 
 model QuizResult {
-  id          BigInt   @id @default(autoincrement())
-  uid         String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  student     User     @relation(fields: [userId], references: [id])  
-  userId      BigInt
-  quiz        Quiz     @relation(fields: [quizId], references: [id])
-  quizId      BigInt
-  totalScore  Int
-  answers     Json
-  submittedAt DateTime @default(now())
+  id            BigInt   @id @default(autoincrement())
+  uid           String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student       User     @relation(fields: [userId], references: [id])
+  userId        BigInt
+  quiz          Quiz     @relation(fields: [quizId], references: [id])
+  quizId        BigInt
+  totalScore    Int
+  obtainedScore Int?
+  answers       Json
+  submittedAt   DateTime @default(now())
 }

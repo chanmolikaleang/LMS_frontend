@@ -23,7 +23,10 @@ import {
 import { ADDRCONFIG } from 'dns';
 import { waitForDebugger } from 'inspector';
 import { AdminDashboardDto } from './entity/dashboard.dto';
-import { InstructorDashboardStats } from './entity/instructorDashboard.dto';
+import {
+  InstructorDashboardStats,
+  SimpleStudent,
+} from './entity/instructorDashboard.dto';
 import { GetCurrentUser } from 'src/common/decorators';
 import {
   Quiz,
@@ -194,5 +197,10 @@ export class CourseResolver {
   @Mutation(() => SubmitQuizResult, { name: 'submitQuiz' })
   async submitQuiz(@Args('submitQuizInput') input: SubmitQuizInput) {
     return this.courseService.submitQuiz(input);
+  }
+
+  @Query(() => [SimpleStudent], { name: 'getStudentofInstructor' })
+  async getUniqueEnrolledStudents(@Args('uid') uid: string) {
+    return this.courseService.getUniqueEnrolledStudents(uid);
   }
 }

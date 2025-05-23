@@ -15,8 +15,8 @@ export class Quiz {
   @Field(() => [Question])
   questions: Question[];
 
-  @Field(() => [QuizResult])
-  result: QuizResult[];
+  @Field(() => [QuizResult], { nullable: true })
+  results: QuizResult[];
 }
 
 @ObjectType()
@@ -43,13 +43,16 @@ export class QuizResult {
   uid: string;
 
   @Field()
-  answer: string;
+  answers: string;
 
   @Field()
   totalScore: number;
 
+  @Field({ nullable: true })
+  obtainedScore: number;
+
   @Field(() => User)
-  questions: User;
+  student: User;
 
   @Field(() => Quiz)
   quiz: Quiz;

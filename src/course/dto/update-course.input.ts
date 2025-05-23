@@ -1,7 +1,37 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { MaterialInput } from './create-course.input';
 import { CourseStatus, CourseType } from '../entity/course.entity';
+import { CreateQuizInput } from 'src/quiz/dto/create-quiz.input';
 
+@InputType()
+export class UpdateQuizInput {
+  @Field()
+  uid: string; // Allow quiz identification
+
+  @Field()
+  title: string;
+
+  @Field(() => [UpdateQuestionInput])
+  questions: UpdateQuestionInput[];
+}
+
+@InputType()
+export class UpdateQuestionInput {
+  @Field({ nullable: true })
+  uid?: string; // optional, for existing questions
+
+  @Field()
+  text: string;
+
+  @Field(() => [String])
+  options: string[];
+
+  @Field(() => Int)
+  correctAnswerIndex: number;
+
+  @Field(() => Int)
+  score: number;
+}
 @InputType()
 export class UpdateCourseInput {
   @Field()
@@ -30,6 +60,18 @@ export class UpdateCourseInput {
 
   @Field({ nullable: true })
   coverImageUrl: string;
+
+  @Field(() => [String])
+  categoryUid: string[];
+
+  @Field(() => [String])
+  docUrls: string[];
+
+  @Field({ nullable: true })
+  level: string;
+
+  @Field(() => UpdateQuizInput, { nullable: true })
+  quiz: UpdateQuizInput;
 }
 
 @InputType()

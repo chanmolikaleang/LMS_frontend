@@ -31,6 +31,9 @@ export class CreateCourseInput {
   @Field(() => [String])
   categoryUid: string[];
 
+  @Field(() => [String])
+  docUrls: string[];
+
   @Field({ nullable: true })
   level: string;
 
