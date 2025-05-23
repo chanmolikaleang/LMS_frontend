@@ -10,10 +10,11 @@ import {
   UpdateCourseInput,
   UpdateReviewCourseInput,
 } from './dto/update-course.input';
-import { Role } from 'src/user/entities/user.entity';
+import { Role, User } from 'src/user/entities/user.entity';
 import {
   CourseStudentStat,
   InstructorDashboardStats,
+  SimpleStudentForm,
 } from './entity/instructorDashboard.dto';
 import { SubmitQuizInput } from 'src/quiz/dto/create-quiz.input';
 
@@ -34,6 +35,7 @@ export class CourseService {
       categoryUid,
       level,
       quiz,
+      docUrls,
     } = createCourseInput;
 
     const user = await this.prismaService.user.findUnique({
@@ -41,6 +43,10 @@ export class CourseService {
         uid: instructorUid,
       },
     });
+
+    if (!user) {
+      throw new Error(`Instructor with UID ${instructorUid} not found`);
+    }
 
     const course = await this.prismaService.course.create({
       data: {
@@ -58,6 +64,7 @@ export class CourseService {
             ppt_url: mat.ppt_url,
           })),
         },
+        docUrls,
 
         Quiz: {
           create: {
@@ -230,7 +237,11 @@ export class CourseService {
         Quiz: {
           include: {
             questions: true,
-            results: true,
+            results: {
+              include: {
+                student: true,
+              },
+            },
           },
         },
         student: {
@@ -514,34 +525,115 @@ export class CourseService {
       price,
       type,
       coverImageUrl,
+      categoryUid,
+      docUrls,
+      level,
+      quiz,
     } = updateCourseInput;
 
     const user = await this.prismaService.user.findUnique({
-      where: {
-        uid: instructorUid,
-      },
+      where: { uid: instructorUid },
     });
 
-    const course = await this.prismaService.course.update({
-      where: { uid: uid },
-      data: {
-        coverImageUrl,
-        name,
-        price,
-        type: type as CourseType,
-        describtion,
-        status: status as CourseStatus,
-        material: {
-          create: material.map((mat) => ({
-            title: mat.title,
-            describtion: mat.describtion,
-            video_url: mat.video_url,
-          })),
+    const course = await this.prismaService.course.findUnique({
+      where: { uid },
+      select: { id: true },
+    });
+
+    if (!user) throw new Error('Instructor not found');
+
+    const updateData: any = {
+      ...(coverImageUrl && { coverImageUrl }),
+      ...(name && { name }),
+      ...(price && { price }),
+      ...(type && { type }),
+      ...(describtion && { describtion }),
+      ...(status && { status }),
+      ...(level && { level }),
+      ...(docUrls && { docUrls }),
+      ...(user && { instructor: { connect: { uid: user.uid } } }),
+      ...(categoryUid?.length && {
+        categories: {
+          set: [], // Optional: clear previous categories
+          connect: categoryUid.map((cat) => ({ uid: cat })),
         },
-        instructor: {
-          connect: { uid: user.uid },
-        },
-      },
+      }),
+    };
+
+    if (material?.length) {
+      const course = await this.prismaService.course.findUnique({
+        where: { uid },
+        include: { material: true },
+      });
+
+      const materialIds = course?.material?.map((mat) => mat.id) || [];
+
+      // Delete progress records first
+      await this.prismaService.progress.deleteMany({
+        where: { materialId: { in: materialIds } },
+      });
+
+      updateData.material = {
+        deleteMany: {},
+        create: material.map((mat) => ({
+          title: mat.title,
+          describtion: mat.describtion,
+          video_url: mat.video_url,
+        })),
+      };
+    }
+
+    if (quiz?.questions?.length) {
+      if (quiz.uid) {
+        updateData.Quiz = {
+          upsert: {
+            where: { uid: quiz.uid },
+            create: {
+              title: quiz.title,
+              questions: {
+                create: quiz.questions.map((q) => ({
+                  text: q.text,
+                  options: q.options,
+                  correctAnswerIndex: q.correctAnswerIndex,
+                  score: q.score,
+                })),
+              },
+            },
+            update: {
+              title: quiz.title,
+              questions: {
+                deleteMany: {},
+                create: quiz.questions.map((q) => ({
+                  text: q.text,
+                  options: q.options,
+                  correctAnswerIndex: q.correctAnswerIndex,
+                  score: q.score,
+                })),
+              },
+            },
+          },
+        };
+      } else {
+        updateData.Quiz = {
+          create: {
+            title: quiz.title,
+            courseId: course.id, // use courseId here too
+            questions: {
+              create: quiz.questions.map((question) => ({
+                text: question.text,
+                options: question.options,
+                correctAnswerIndex: question.correctAnswerIndex,
+                score: question.score,
+              })),
+            },
+          },
+        };
+      }
+    }
+
+    const updateCourse = await this.prismaService.course.update({
+      where: { uid },
+      data: updateData,
       include: {
         material: true,
         instructor: true,
@@ -549,7 +641,7 @@ export class CourseService {
       },
     });
 
-    return course;
+    return updateCourse;
   }
 
   async getAllCoursesWithStudentProgress(studentUid: string) {
@@ -963,12 +1055,50 @@ export class CourseService {
       }),
     );
 
+    // ✅ Calculate total income from PAID courses
+    const totalIncome = instructor.instructorOf
+      .filter((course) => course.type === 'Paid')
+      .reduce(
+        (sum, course) => sum + parseFloat(course.price) * course.student.length,
+        0,
+      );
+
     return {
       totalCourses,
       totalStudents,
       averageRating: parseFloat(averageRating.toFixed(2)),
       studentPerCourse,
+      totalIncome,
     };
+  }
+
+  async getUniqueEnrolledStudents(uid: string) {
+    const instructor = await this.prismaService.user.findUnique({
+      where: { uid },
+      include: {
+        instructorOf: {
+          include: {
+            student: true,
+          },
+        },
+      },
+    });
+
+    if (!instructor) {
+      throw new Error('Instructor not found');
+    }
+
+    const studentMap = new Map<string, SimpleStudentForm>();
+
+    for (const course of instructor.instructorOf) {
+      for (const student of course.student) {
+        studentMap.set(student.uid, student);
+      }
+    }
+
+    const uniqueStudents = Array.from(studentMap.values());
+
+    return uniqueStudents;
   }
 
   async getQuiz(uid: string) {
@@ -994,6 +1124,10 @@ export class CourseService {
       include: { questions: true },
     });
 
+    const student = await this.prismaService.user.findUnique({
+      where: { uid: input.studentUid },
+    });
+
     if (!quiz) throw new Error('Quiz not found');
 
     let totalScore = 0;
@@ -1016,14 +1150,36 @@ export class CourseService {
       };
     });
 
-    await this.prismaService.quizResult.create({
-      data: {
-        quiz: { connect: { uid: quiz.uid } },
-        student: { connect: { uid: input.studentUid } },
-        totalScore,
-        answers: JSON.parse(JSON.stringify(input.answers)), // Keep raw input in DB
+    // Check if the student already submitted this quiz
+    const existingResult = await this.prismaService.quizResult.findFirst({
+      where: {
+        quizId: quiz.id,
+        userId: student.id,
       },
     });
+
+    if (existingResult) {
+      // Update the existing result
+      await this.prismaService.quizResult.update({
+        where: { uid: existingResult.uid },
+        data: {
+          totalScore,
+          obtainedScore,
+          answers: JSON.parse(JSON.stringify(input.answers)), // Keep raw input in DB
+        },
+      });
+    } else {
+      // Create new result
+      await this.prismaService.quizResult.create({
+        data: {
+          quiz: { connect: { uid: quiz.uid } },
+          student: { connect: { uid: input.studentUid } },
+          totalScore,
+          obtainedScore,
+          answers: JSON.parse(JSON.stringify(input.answers)), // Keep raw input in DB
+        },
+      });
+    }
 
     return {
       totalScore,

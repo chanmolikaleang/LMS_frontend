@@ -75,6 +75,7 @@ type Course {
   coverImageUrl: String
   createdAt: DateTime
   describtion: String
+  docUrls: [String!]!
   instructor: [User!]
   level: String
   material: [Material!]!
@@ -131,6 +132,7 @@ type CourseWithProgress {
   coverImageUrl: String
   createdAt: DateTime
   describtion: String
+  docUrls: [String!]!
   instructor: [User!]
   level: String
   material: [MaterialWithProgress!]!
@@ -161,6 +163,7 @@ input CreateCourseInput {
   categoryUid: [String!]!
   coverImageUrl: String
   describtion: String!
+  docUrls: [String!]!
   instructorUid: String!
   level: String
   material: [MaterialInput!]!
@@ -218,6 +221,7 @@ type InstructorDashboardStats {
   averageRating: Float!
   studentPerCourse: [CourseStudentStat!]!
   totalCourses: Int!
+  totalIncome: Float!
   totalStudents: Int!
 }
 
@@ -302,6 +306,7 @@ type Query {
   getQuiz(quizUid: String!): Quiz!
   getStudentCourses(studentUid: String!): [Course!]!
   getStudentRecommendCourses(studentUid: String!): [Course!]!
+  getStudentofInstructor(uid: String!): [SimpleStudent!]!
   getStudents: [User!]!
   getSubject(uid: String!): Subject!
   getSubjects: [Subject!]!
@@ -324,7 +329,7 @@ type Question {
 type Quiz {
   courseUid: String!
   questions: [Question!]!
-  result: [QuizResult!]!
+  results: [QuizResult!]
   title: String!
   uid: String!
 }
@@ -335,9 +340,10 @@ input QuizAnswerInput {
 }
 
 type QuizResult {
-  answer: String!
-  questions: User!
+  answers: String!
+  obtainedScore: Float
   quiz: Quiz!
+  student: User!
   totalScore: Float!
   uid: String!
 }
@@ -394,6 +400,15 @@ type SignUpResponse {
   username: String!
 }
 
+type SimpleStudent {
+  email: String!
+  firstName: String!
+  lastName: String!
+  profileImg: String
+  uid: String!
+  username: String!
+}
+
 type StudentProgress {
   completed: Boolean!
   percentage: Float!
@@ -445,12 +460,16 @@ input UpdateAchievementIuput {
 }
 
 input UpdateCourseInput {
+  categoryUid: [String!]!
   coverImageUrl: String
   describtion: String!
+  docUrls: [String!]!
   instructorUid: String!
+  level: String
   material: [MaterialInput!]!
   name: String!
   price: String
+  quiz: UpdateQuizInput
   status: String
   type: String
   uid: String!
@@ -483,6 +502,20 @@ input UpdatePersonalInformationInput {
   profileImg: String
   uid: String!
   username: String!
+}
+
+input UpdateQuestionInput {
+  correctAnswerIndex: Int!
+  options: [String!]!
+  score: Int!
+  text: String!
+  uid: String
+}
+
+input UpdateQuizInput {
+  questions: [UpdateQuestionInput!]!
+  title: String!
+  uid: String!
 }
 
 input UpdateReviewCourseInput {

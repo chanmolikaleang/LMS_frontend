@@ -93,6 +93,9 @@ export class Course {
   @Field(() => [Category], { nullable: true })
   categories: Category;
 
+  @Field(() => [String])
+  docUrls: string[];
+
   @Field({ nullable: true })
   level: string;
 
@@ -221,6 +224,9 @@ export class CourseWithProgress {
 
   @Field(() => [Category], { nullable: true })
   categories: Category;
+
+  @Field(() => [String])
+  docUrls: string[];
 
   @Field({ nullable: true })
   level: string;
